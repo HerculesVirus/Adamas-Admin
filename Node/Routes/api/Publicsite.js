@@ -8,7 +8,7 @@ const CategoryModel = require('../../models/Category')
 const Product = require('../../models/Product')
 const User = require('../../models/user')
 //middleware
-// const {requireAuth} =require('../../middlewares/authUser')
+ const {requireAuth} =require('../../middlewares/authUser')
 //Multer Config
 //Store Image
 var storage = multer.diskStorage({
@@ -68,8 +68,8 @@ router.get('/publicsite/product', async (req,res) => {
     .then( data => res.json(data))
     .catch(err => console.log(err)) 
 })
-//CategoryShop
-router.get('/publicsite/category/product' , async (req,res) => {
+//CategoryShop publicsite/category/product
+router.get('/publicsite/category/product' ,requireAuth, async (req,res) => {
     const PAGE_SIZE = 3
     const page = parseInt(req.query.page || "0");
   
@@ -107,8 +107,7 @@ router.post('/publicsite/register', async(req,res) =>{
         console.log(name ,email , password)
         const user = await User.create({ name ,email ,password })
         const token = createToken(user._id)
-        res.cookie('jwt' , token , { httpOnly: true , maxAge : maxAge * 1000})
-        res.status(201).json({user : user._id , message : "User is Created"});
+        res.status(201).json({user : user._id , message : "User is Created" , token});
     }
     catch(err){
         const errors = HandleErrors(err)
@@ -127,7 +126,7 @@ router.post('/publicsite/signin', async(req,res) =>{
         const user = await User.login(email, password)
         const token = createToken(user._id)
         
-        res.cookie('jwt', token , {httpOnly : true , maxAge : maxAge *1000})
+        //res.cookie('jwt', token , {httpOnly : true , maxAge : maxAge *1000})
         res.status(200).json({user : user._id , token})
     }
     catch(err){

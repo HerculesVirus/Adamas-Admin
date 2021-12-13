@@ -1,8 +1,7 @@
 const jwt = require('jsonwebtoken')
 
 const requireAuth = (req,res,next)=> {
-    console.log(req.cookies)
-    const token = req.cookies.access_token;
+    const token = req.headers['x-access-token']
     console.log(token)
     //check web token exist & is verified
     if(token){
