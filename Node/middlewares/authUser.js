@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken')
 
 const requireAuth = (req,res,next)=> {
     const token = req.headers['x-access-token']
+    console.log("Hello from MIDDLEWARE")
     console.log(token)
     //check web token exist & is verified
     if(token){
@@ -10,15 +11,15 @@ const requireAuth = (req,res,next)=> {
                 console.log(err)
             }
             else{
+                console.log("DecodedToke : ")
                 console.log(decodedToken)
-                res.json(decodedToken)
                 next()
             }
         })
     }
     else{
         console.log('token is not verified')
-        res.json({'message': 'token not exist'})
+        res.json({message: "token not exist"})
     }
 }
 

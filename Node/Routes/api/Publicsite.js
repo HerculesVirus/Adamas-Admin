@@ -9,6 +9,7 @@ const Product = require('../../models/Product')
 const User = require('../../models/user')
 //middleware
  const {requireAuth} =require('../../middlewares/authUser')
+ console.log(Object.values(requireAuth))
 //Multer Config
 //Store Image
 var storage = multer.diskStorage({
@@ -27,7 +28,7 @@ const HandleErrors = (err) => {
     const errors = { name : '' , email: '' , password : ''}
     //incorrect email
     if(err.message === 'incorrect email'){
-        errors.email = 'that email is not registerd'
+        errors.email = 'Email is not registerd'
     }
     //incorrect password
     if(err.message === 'incorrect password'){
@@ -64,16 +65,29 @@ router.get('/publicsite/categries', (req,res) => {
 })
 //It is used in Home Page
 router.get('/publicsite/product', async (req,res) => {
-    Product.find({})
-    .then( data => res.json(data))
-    .catch(err => console.log(err)) 
+        Product.find({})
+        .then( data => res.json(data))
+        .catch(err => console.log(err))
 })
+
+router.get('/publicsite/ProductPreview/:id' , async(req,res)=> {
+    const { id } = req.params
+    console.log(`/product findOne :  ${id}`)
+
+    if(id){
+        Product.findOne({ _id : id })
+        .then( data => res.json(data))
+        .catch(err => console.log(err)) 
+    }
+})
+
 //CategoryShop publicsite/category/product
-router.get('/publicsite/category/product' ,requireAuth, async (req,res) => {
+router.get('/publicsite/category/product' ,requireAuth , async (req,res) => {
     const PAGE_SIZE = 3
     const page = parseInt(req.query.page || "0");
   
     const {id} =req.query
+    console.log("before id")
     console.log(id)
     console.log(typeof id)
     if(id && typeof id !== undefined && id !=="null" ){
@@ -85,7 +99,10 @@ router.get('/publicsite/category/product' ,requireAuth, async (req,res) => {
         .then(data =>{
             res.json({totalPages: Math.ceil(total /PAGE_SIZE), data})
         })
-        .catch(err => console.log(err))
+        .catch(err =>{
+            console.log(err)
+            return;
+        } )
     }
     else{
         console.log('ELSE ALL documents : ')
@@ -95,6 +112,10 @@ router.get('/publicsite/category/product' ,requireAuth, async (req,res) => {
         .skip(PAGE_SIZE * page)
         .then( data => {
             res.json({totalPages: Math.ceil(total /PAGE_SIZE), data})
+        })
+        .catch(err =>{
+            console.log(err)
+            return;
         })
     }
 
@@ -127,7 +148,7 @@ router.post('/publicsite/signin', async(req,res) =>{
         const token = createToken(user._id)
         
         //res.cookie('jwt', token , {httpOnly : true , maxAge : maxAge *1000})
-        res.status(200).json({user : user._id , token})
+        res.status(200).json({user : user , token})
     }
     catch(err){
         const errors = HandleErrors(err)
