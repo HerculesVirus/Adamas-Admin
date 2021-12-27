@@ -5,7 +5,7 @@ const cartSchema = new mongoose.Schema({
         type : String,
         required : true 
     }
-},{timestamp : true})
+})
 
 const Cart = mongoose.model('Cart' ,cartSchema)
 module.exports =Cart
