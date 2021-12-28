@@ -3,6 +3,7 @@ const express = require('express')
 const router = express.Router()
 const multer = require("multer");
 const jwt = require('jsonwebtoken')
+const passport = require('passport')
 //Load Model 
 const CategoryModel = require('../../models/Category')
 const Product = require('../../models/Product')
@@ -160,52 +161,22 @@ router.post('/publicsite/signin', async(req,res) =>{
         // console.log(`user is not created ${err}`)
     }
 })
+
+router.get('/publicsite/signin/google' , passport.authenticate('google',{
+    scope : ['profile' ,'email']
+}))
+
+router.get('publicsite/signin/google/redirect', passport.authenticate('google') ,(req,res)=> {
+    //res.send(req.user)
+    res.redirect('/auth/profile')
+})
 /////////////////////////////CartItem/////////////////////////////////
-//EDIT data Populate #findOne
-router.get('/publicsite/cartItem' , async(req,res)=>{
-    const {id} =req.query
-    await CartItem.findOne({cartId : id})
-    .then(data => {
-        console.log(data)
-        res.json({data , message:"success"})
-    })
-    .catch(err => console.log(err))
-
-})
-
-//Qty Updated
-router.put('/publicsite/cartItem' , async(req,res) => {
-    console.log('Qty is updated')
-    //Cart_Id
-    const {id}=req.query
-    CartItem.findOneAndUpdate ({"cartId" : id},{
-        Qty : req.body.Qty
-    })
-    .then(data => res.json({message : "Qty is updated"}))
-    .catch(err => console.log(err))
-})
-//delete cardItem
-router.delete('/publicsite/cartItem' , async(re,res)=>{
-    console.log(`Delete items`)
-    const {id} = req.query;
-    CartItem.findOneAndRemove({'_id' : id} , (err , data)=>{
-        if(!err){
-            console.log(data)
-            res.json({message  : data})
-        }
-        else{
-            console.log(err)
-            res.json({message : err})
-        }
-    })
-})
 ////////////////////////////////Cart//////////////
 router.post('/publicsite/Cart', async(req,res)=> {
 
     console.log(`POST Cart api HIT`)
     // console.log(req.query.id)
-
-    console.log(req.body);
+    // console.log(req.body);
 
     const productValue = req.body
     const userId = req.query.id;
@@ -217,21 +188,23 @@ router.post('/publicsite/Cart', async(req,res)=> {
             console.log(`cart already exist`)
             //When cardId then productId already exist
             // console.log(currentcart._id)
-
             CartItem.findOne({cartId : currentcart._id})
             .then((currentProduct)=> {
                 if(currentProduct){
-                    console.log(currentProduct)
-                    CartItem.findOne({productId : currentProduct.productId })
+                    // console.log('current Product is here')
+                    // console.log(currentProduct)
+                    // console.log(productValue.productId)
+
+                    CartItem.findOne({'productId' : productValue.productId })
                     .then((item)=>{
                         if(item){
-                            console.log('Item is already exist')
+                            // console.log('Item is already exist')
                             res.json({message : `this Item already exist`})
                         }
                         else{
                             //This is new Item
                             new CartItem({
-                                cartId : item._id ,
+                                cartId : currentcart._id ,
                                 productId  : productValue.productId,
                                 Qty : productValue.Qty
                             })
@@ -240,11 +213,13 @@ router.post('/publicsite/Cart', async(req,res)=> {
                             .catch(err => console.log(err))
                         }
                     })
+                    .catch(err => console.log(err))
                 }
                 else{
                     console.log(`cartId not exist`)
+                    res.json({message : `cartId not exist `})
                 }
-                //res.json({message : `This product already exist ${currentProduct}`})
+                
             })
             .catch(err => console.log(err))   
         }
@@ -252,21 +227,79 @@ router.post('/publicsite/Cart', async(req,res)=> {
             //create a cart
             console.log(`create a cart`)
             const cart =  new Cart({ USER_ID : userId })
-            console.log(cart._id)
+            // console.log(cart._id)
             cart.save(function (err , result){
-                console.log(result._id)
+                // console.log(result._id)
                 const cartitem = new CartItem({
                     cartId : result._id ,
                     productId  : productValue.productId,
                     Qty : productValue.Qty
                 })
                 cartitem.save(function(err,result){
-                    console.log('cartitem created')
+                    // console.log('cartitem created')
                     res.json({message: `cartItem is created successfully${result}`})
                 })
             })
         }
         
+    })
+    .catch(err => console.log(err))
+})
+//ALL products that a single userID holdes
+//1-get a USER_ID from Cart
+//2-Then get that's USER Cart_id from Carts Table
+//3-Get all Products from Cartitem
+router.get('/publicsite/Cart' , async(req,res) => {
+    console.log(`GET Cart api HIT`)
+    
+    const userId = req.query.id;
+    console.log(userId)
+    Cart.findOne({USER_ID : userId})
+    .then((currentUser)=> {
+        if(currentUser){
+            //get this user Cart_id
+            //and check this card have some product or not
+            CartItem.find({'cartId' : currentUser._id})
+            .then(async(products)=>{
+                if(products){
+                    let collectProduct = []
+                    // res.json(products)
+                    //console.log(products)
+                    for(let i=0 ; i<products.length ; i++){
+                        console.log(`for loop one item at a time`)
+                        console.log(products[i].productId)
+                        await Product.findOne({_id: products[i].productId})
+                        .then((data) => {
+                            if(data){
+                                collectProduct.push(data)
+                            }
+                        })
+                    }
+                    // await products.map(async(item) => {
+                    //     console.log(`one at a time`)
+                    //     console.log(item.productId)
+                    //     await Product.findOne({_id : item.productId})
+                    //     .then((data)=> {
+                    //         if(data){
+                    //             //Find that Product
+                    //             // console.log(`in Product Schema`)
+                    //             // console.log(data)
+                    //             collectProduct.push(data)
+                    //         }
+                    //     })
+                    //     .catch(err => console.log(err))
+                    // })
+                    console.log(`It is out of Map`)
+                    console.log(collectProduct)
+                    res.send(collectProduct)
+                }
+                else{
+                    console.log(`No Product is yet added `)
+                    res.json({message : `No Product is yet added`})
+                }
+            })
+            .catch((err) => console.log(err))
+        }
     })
     .catch(err => console.log(err))
 })

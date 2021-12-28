@@ -18,7 +18,7 @@ const Publicsite = require('./Routes/api/Publicsite')
 //cors
 //app.use(cors())
 app.use(cors({
-	origin: ['http://localhost:3000' , 'http://localhost:3001'],
+	origin: ['http://localhost:3000' , 'http://localhost:3001' , 'https://console.cloud.google.com/'],
 	credentials:true,
 	exposedHeaders: ["set-cookie"]
 }));
