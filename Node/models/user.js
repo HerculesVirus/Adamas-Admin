@@ -19,11 +19,7 @@ const userSchema = new mongoose.Schema({
         type :String , 
         required : [true ,  `Please enter an Password`], 
         minlength : [6 , 'minimum password length is 6 character'],
-    },
-    googleId : {
-        type : String
     }
-
 })
 //Incrypt Data and SAVE
 userSchema.pre('save', async function(next) {

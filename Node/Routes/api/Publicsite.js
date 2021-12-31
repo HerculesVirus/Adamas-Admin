@@ -11,7 +11,8 @@ const User = require('../../models/user')
 const Cart = require('../../models/Cart')
 const CartItem = require('../../models/CartItem')
 //middleware
- const {requireAuth} =require('../../middlewares/authUser')
+ const {requireAuth} =require('../../middlewares/authUser');
+
 //  console.log(Object.values(requireAuth))
 //Multer Config
 //Store Image
@@ -162,13 +163,14 @@ router.post('/publicsite/signin', async(req,res) =>{
     }
 })
 
-router.get('/publicsite/signin/google' , passport.authenticate('google',{
+router.get('/google' , passport.authenticate('google',{
     scope : ['profile' ,'email']
 }))
 
-router.get('publicsite/signin/google/redirect', passport.authenticate('google') ,(req,res)=> {
+router.get('/google/redirect', passport.authenticate('google') ,(req,res)=> {
     //res.send(req.user)
-    res.redirect('/auth/profile')
+    console.log(`redirect issue`)
+    res.redirect('http://localhost:3000/')
 })
 /////////////////////////////CartItem/////////////////////////////////
 ////////////////////////////////Cart//////////////
@@ -191,33 +193,49 @@ router.post('/publicsite/Cart', async(req,res)=> {
             CartItem.findOne({cartId : currentcart._id})
             .then((currentProduct)=> {
                 if(currentProduct){
-                    // console.log('current Product is here')
-                    // console.log(currentProduct)
+                    console.log('current Product is here')
+                    console.log(currentProduct)
                     // console.log(productValue.productId)
 
                     CartItem.findOne({'productId' : productValue.productId })
                     .then((item)=>{
                         if(item){
-                            // console.log('Item is already exist')
-                            res.json({message : `this Item already exist`})
+                            console.log(`itme is here`)
+                            console.log(`item.Qty : ${item.Qty}`)
+                            console.log(`productValue.Qty : ${productValue.Qty}`)
+
+                            if(parseInt(item.Qty) !== parseInt(productValue.Qty))
+                            {
+                                CartItem.updateOne({ 'productId' : productValue.productId }  , { Qty: productValue.Qty } )
+                                .then((done)=>{
+                                    return res.json({message : "item Qty is updated"})
+                                })
+                                .catch(err => console.log(err))
+
+                            }
+                            else{
+                                console.log('Item is already exist')
+                                return res.json({message : "Item Qty is Same"})
+                            }
                         }
                         else{
                             //This is new Item
+                            console.log('new item')
                             new CartItem({
                                 cartId : currentcart._id ,
                                 productId  : productValue.productId,
                                 Qty : productValue.Qty
                             })
                             .save()
-                            .then(data => res.json({message: `cartItem is created successfully${data}`}))
+                            .then(data => res.json({message: `cartItem is created successfully`}))
                             .catch(err => console.log(err))
                         }
                     })
                     .catch(err => console.log(err))
                 }
                 else{
-                    console.log(`cartId not exist`)
-                    res.json({message : `cartId not exist `})
+                    console.log(`cartId not exist in cartItemSchema`)
+                    res.json({message : `cartId not exist in cartItemSchema `})
                 }
                 
             })
@@ -237,7 +255,7 @@ router.post('/publicsite/Cart', async(req,res)=> {
                 })
                 cartitem.save(function(err,result){
                     // console.log('cartitem created')
-                    res.json({message: `cartItem is created successfully${result}`})
+                    res.json({message: `cartItem is created successfully`})
                 })
             })
         }
@@ -275,20 +293,6 @@ router.get('/publicsite/Cart' , async(req,res) => {
                             }
                         })
                     }
-                    // await products.map(async(item) => {
-                    //     console.log(`one at a time`)
-                    //     console.log(item.productId)
-                    //     await Product.findOne({_id : item.productId})
-                    //     .then((data)=> {
-                    //         if(data){
-                    //             //Find that Product
-                    //             // console.log(`in Product Schema`)
-                    //             // console.log(data)
-                    //             collectProduct.push(data)
-                    //         }
-                    //     })
-                    //     .catch(err => console.log(err))
-                    // })
                     console.log(`It is out of Map`)
                     console.log(collectProduct)
                     res.send(collectProduct)
