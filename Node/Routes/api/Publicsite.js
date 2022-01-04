@@ -339,33 +339,25 @@ router.get('/publicsite/Cart' , async(req,res) => {
 })
 
 //Update Qty only
-router.put('/publicsite/Cart' , async(req,res) => {
+router.put('/publicsite/CartUpdate' , async(req,res) => {
     console.log(`Hello PUT HIT`)
     //Qty should be send in req.body
-    const update = { Qty: 2 };
-    const productValue = req.body
-    const filter = {'productInfo' : productValue.productId};
-    const userId = req.query.id;
-    Cart.findOne({USER_ID : userId})
-    .then((currentUser)=>{
-        if(currentUser){
-            CartItem.findOne(filter , update)
-            .then(function(err,result){
-                if(!err){
-                    console.log(`result`)
-                    res.json({message : `Qty is Updated successfully`})
-                }
-                else{
-                    console.log(err)
-                }
-            })
-            .catch(err => console.log(err))
+    console.log(req.body.data)
+    const pItem = req.body.data
+    console.log(`pItem.Qty : ${pItem.Qty}`) //new qty
+    console.log(`pItem.cartItem.Qty : ${pItem.cartItem.Qty}`) //old qty
+    const filter = {'productInfo' : pItem.cartItem.productInfo._id};
+    const update = {'Qty' : pItem.Qty}
+    CartItem.updateOne(filter,update)
+    .then((data)=>{
+        if(data){
+            res.json({message : "updated Successfully"})
         }
         else{
-            console.log(`User ID not exist`)
+            console.log(`some issue is occured`)
         }
     })
-    .catch(err => console.log(err))
+    .catch((err)=> console.log(err))
 })
 //Delete
 router.delete('/publicsite/CartDel', (req,res)=>{
@@ -379,8 +371,11 @@ router.delete('/publicsite/CartDel', (req,res)=>{
     .then(function(result,err){
         if(result){
             console.log(`result payload : ${result}`)
-            CartItem.find({})
-            .then(data => res.send(data))
+            CartItem.find({}).populate('productInfo')
+            .then((data) =>{
+                console.log(data)
+                res.send(data)
+            } )
             .catch(err => console.log(err))
         }
         else{
