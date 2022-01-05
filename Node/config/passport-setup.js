@@ -1,14 +1,14 @@
 const passport = require('passport')
 const GoogleStrategy= require('passport-google-oauth20').Strategy
-const config = require('config')
+const config = require("config")
 const clientID = config.get('clientID')
 const clientSecret = config.get('clientSecret')
 
 // console.log(`This is from passport setup`)
 // console.log(`clientID : ${clientID}`)
 // console.log(`clientSecret : ${clientSecret}`)
-// // Load Model
-const User = require('../models/user')
+// Load Model
+const User = require('../src/api/models/user')
 
 passport.serializeUser((user,done)=> {
     console.log(`Serialized`)

@@ -2,6 +2,7 @@ var express = require('express');
 const bodyparser=require('body-parser')
 var cors = require('cors'); 
 var app = express();
+
 const cookieParser = require('cookie-parser')
 const passport = require('passport')
 const passportSetup = require('./config/passport-setup')
@@ -25,9 +26,10 @@ const connectDB = require('./config/db');
 //Connect Database
 connectDB();
 //routes
-const categories = require('./Routes/api/categories')
-const products = require('./Routes/api/products')
-const Publicsite = require('./Routes/api/Publicsite')
+// const categories = require('./src/api/categories')
+// const products = require('./src/api/products')
+// const Publicsite = require('./src/api/Publicsite')
+const routes = require('./src/api/Routes/v1');
 
 
 
@@ -64,9 +66,10 @@ app.use(express.urlencoded({extended: true}))
 // static Path for File Dump
 app.use('/public', express.static('public'));
 // use Routes
-app.use('/api', categories)
-app.use('/api', products)
-app.use('/api', Publicsite)
+app.use('/v1' , routes)
+// app.use('/api', categories)
+// app.use('/api', products)
+// app.use('/api', Publicsite)
 
 
 app.listen(8000, function() {
