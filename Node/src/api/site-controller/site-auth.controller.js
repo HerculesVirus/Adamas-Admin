@@ -1,4 +1,7 @@
 // const localStrategy = require('passport-local').Strategy; //Use later
+const localStrategy = require('passport-local').Strategy;
+const jwt = require('jsonwebtoken')
+const passport = require('passport')
 //LoadModel
 const User = require('../models/user')
 
@@ -67,8 +70,31 @@ exports.signin = async(req,res) =>{
         // console.log(email , password)
         const user = await User.login(email, password)
         const token = createToken(user._id)
-        //res.cookie('jwt', token , {httpOnly : true , maxAge : maxAge *1000})
-        res.status(200).json({user , token})
+        // call for passport authentication
+        passport.authenticate('local', async (err, user, info) => {
+            if (err) return res.status(400).send({ err, status: false, message: 'Oops! Something went wrong while authenticating' });
+            // registered user
+            else if (user) {
+            // if (user.roleId === null && user.type !== 1)
+            // return res.status(403).send({ status: false, message: 'Your account is inactive, kindly contact admin', user });
+            // else if (user.type === 1)
+            // return res.status(403).send({ success: false, message: 'Invalid login attempt' });
+            // else if (user.accountStatus === 2)
+            // return res.status(403).send({ success: false, message: 'Your account is inactive, kindly contact admin', user });
+            // else {
+            //     var accessToken = await user.token();
+            //     let data = {
+            //     ...user._doc,
+            //     accessToken
+            //     }
+            //     await User.updateOne({ _id: user._id }, { $set: { accessToken } }, { upsert: true });
+            //     return res.status(200).send({ status: true, message: 'User logged in successfully', data });
+            // }
+            res.status(200).json({user , token})
+            }
+            // unknown user or wrong password
+            else return res.status(402).send({ status: false, message: 'Incorrect email or password' });
+        })(req,res);
     }
     catch(err){
         const errors = HandleErrors(err)

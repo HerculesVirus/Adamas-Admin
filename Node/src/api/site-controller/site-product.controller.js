@@ -77,3 +77,16 @@ exports.retrieveShopProducts = async (req,res) => {
     }
 
 }
+//GetOneProduct
+exports.retrieveOneProductPreview =  async(req,res)=> {
+    const { id } = req.params
+    console.log(`retrieveOneProductPreview findOne :  ${id}`)
+    if(id){
+        Product.findOne({ _id : id })
+        .then( data => res.json(data))
+        .catch(err => console.log(err)) 
+    }
+    else{
+        console.log(`Could not find the Id of the Product`)
+    }
+}

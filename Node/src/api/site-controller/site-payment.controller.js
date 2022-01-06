@@ -1,5 +1,6 @@
 
 const stripe = require('stripe')('sk_test_51KEBJqLmuMhZJPFDO6LL3mCMFYaopGlV1MS42VzGknbk4jQ6FpV4ZHL0VpbkugYFyng95Q5CasfvuFXVMFgE6FcB00l0D4RA5G');
+const sendMail = require('../Services/emailProvider')
 
 exports.createIntent = async (req, res) => {
     //user sends price along with request
@@ -32,6 +33,9 @@ exports.confirmPayment = async (req, res) => {
           if (paymentIntent.status === 'succeeded') {
             /*YOUR CODE HERE*/   
             console.log("confirmed stripe payment: " + clientid);
+            //fire emailProvider
+            //send(to,from,subject,text)
+            sendMail.send('arslan03037436054@gmail.com','Mailgun Sandbox <postmaster@sandboxae47135174fc48ceab56e91199c50502.mailgun.org>','Adamas store Transaction','Here is the amount $4242 which is deduced from your account')
             res.json({success: true});
           } else {
             res.json({success: false});

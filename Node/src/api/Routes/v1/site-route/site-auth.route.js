@@ -2,7 +2,7 @@ const express = require('express')
 const controller = require('../../../site-controller/site-auth.controller')
 const router = express.Router()
 const passport = require('passport')
-const jwt = require('jsonwebtoken')
+
 
 //Register
 router.route('/register').post(controller.register)

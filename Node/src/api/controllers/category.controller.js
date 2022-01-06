@@ -7,11 +7,11 @@ exports.retrieveCategoryIsExist = async (req, res) => {
     await CategoryModel.find({})
     .then((err ,docs)=>{
         if(!err){
-            console.log('are you here')
-            res.send(`data is find in mongo ${docs}`)
+          console.log('are you here')
+          res.send(`data is find in mongo ${docs}`)
         }
         else{
-            console.log(err)
+          console.log(err)
         }
     })
     .catch(err => console.log(err))

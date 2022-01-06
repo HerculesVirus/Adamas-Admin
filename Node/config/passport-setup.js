@@ -1,8 +1,10 @@
 const passport = require('passport')
 const GoogleStrategy= require('passport-google-oauth20').Strategy
+const localStrategy = require('passport-local').Strategy;
 const config = require("config")
 const clientID = config.get('clientID')
 const clientSecret = config.get('clientSecret')
+const bcrypt = require('bcrypt')
 
 // console.log(`This is from passport setup`)
 // console.log(`clientID : ${clientID}`)
@@ -56,3 +58,22 @@ passport.use("google",
         .catch((err) => console.log(err))
     })
 )
+
+passport.use(new localStrategy({ usernameField: 'email' },
+    (username, password, done)=>{
+      User.findOne({ email: username }, (err, user)=>{
+        if (err) { return done(err); }
+        if (!user) { return done(null, false); } // unregistered email
+        bcrypt.compare(password , user.password , (err,result)=>{
+            if(err) throw err ;
+            if(result === true){
+                return done(null,user)
+            }
+            else{
+                return done(null,false)
+            }
+        })// wrong password
+        return done(null, user);
+      });
+    }
+  ));
