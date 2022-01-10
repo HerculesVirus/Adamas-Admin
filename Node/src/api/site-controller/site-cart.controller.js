@@ -41,14 +41,24 @@ exports.create = async(req,res)=> {
                             {
                                 CartItem.updateOne({ 'productInfo' : productValue.productId }  , { Qty: productValue.Qty } )
                                 .then((done)=>{
-                                    return res.json({message : "item Qty is updated"})
+                                    // console.log(`done`)
+                                    // console.log(done)
+                                    CartItem.find({}).populate('productInfo')
+                                    .then(data =>{
+                                        return res.json({message : "item Qty is updated" ,data:data})
+                                    })
+                                    .catch(err => console.log(err))                                    
+                                    
                                 })
                                 .catch(err => console.log(err))
-
                             }
                             else{
                                 //console.log('Item is already exist')
-                                return res.json({message : "Item Qty is Same"})
+                                CartItem.find({}).populate('productInfo')
+                                .then(data =>{
+                                    return res.json({message : "Item Qty is Same", data:data})
+                                })
+                                .catch(err => console.log(err))
                             }
                         }
                         else{
@@ -60,7 +70,18 @@ exports.create = async(req,res)=> {
                                 Qty : productValue.Qty
                             })
                             .save()
-                            .then(data => res.json({message: `cartItem is created successfully`}))
+                            .then(data =>{
+                                console.log(`cartItem is created successfully`)
+                                //console.log(data)
+                                CartItem.find({}).populate('productInfo')
+                                .then(data =>{
+                                    // console.log(`all items`)
+                                    // console.log(data)
+                                    return res.json({message: `cartItem is created successfully` , data})
+                                })
+                                .catch(err=> console.log(err))
+                                
+                            })
                             .catch(err => console.log(err))
                         }
                     })
@@ -79,7 +100,16 @@ exports.create = async(req,res)=> {
                         cartitem.save(function(err,result){
                             // console.log('cartitem created')
                             if(result){
-                                res.json({message : `cartId not exist in cartItemSchema but create Sucessfully `})
+                                // console.log(`cartId not exist in cartItemSchema but create Sucessfully`)
+                                // console.log(result)
+                                CartItem.find({}).populate('productInfo')
+                                .then(data =>{
+                                    // console.log(`all items`)
+                                    // console.log(data)
+                                    return res.json({message : `cartId not exist in cartItemSchema but create Sucessfully` , data})
+                                })
+                                .catch(err => console.log(err))
+                                
                             }
                             else{
                                 console.log(err)
@@ -128,7 +158,7 @@ exports.retrieve = async(req,res) => {
             await CartItem.find({'cartId' : currentUser._id}).populate('productInfo')
             .then(async(cartItem)=>{
                 if(cartItem){
-                    console.log(cartItem) 
+                    // console.log(cartItem) 
                     res.send(cartItem)  
                 }
                 else{
@@ -154,7 +184,12 @@ exports.update = async(req,res) => {
     await CartItem.updateOne(filter,update)
     .then((data)=>{
         if(data){
-            res.json({message : "updated Successfully"})
+            CartItem.find({}).populate('productInfo')
+            .then(data=>{
+                return res.json({message : "updated Successfully" , data:data})
+            })
+            .catch(err => console.log(err))
+            
         }
         else{
             console.log(`some issue is occured`)

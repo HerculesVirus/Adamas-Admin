@@ -90,7 +90,7 @@ exports.signin = async(req,res) =>{
             //     await User.updateOne({ _id: user._id }, { $set: { accessToken } }, { upsert: true });
             //     return res.status(200).send({ status: true, message: 'User logged in successfully', data });
             // }
-            res.status(200).json({user , token})
+                return res.status(200).json({user , token})
             }
             // unknown user or wrong password
             else return res.status(402).send({ status: false, message: 'Incorrect email or password' });
