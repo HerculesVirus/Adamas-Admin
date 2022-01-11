@@ -6,15 +6,6 @@ const passport = require('passport')
 const User = require('../models/user')
 
 
-//AgeOfToken
-const maxAge = 3 * 24* 60 * 60
-//CreateToken for jwt
-const createToken = (id) => {
-    return jwt.sign({id} , `Ticket secret key` , {
-        expiresIn : maxAge 
-    })
-}
-
 //Error Handle
 const HandleErrors = (err) => {
     console.log(err.message , err.code)
@@ -51,8 +42,7 @@ exports.register = async(req,res) =>{
     try{
         // console.log(name ,email , password)
         const user = await User.create({ name ,email ,password })
-        const token = createToken(user._id)
-        res.status(201).json({user : user._id , message : "User is Created" , token});
+        res.status(201).json({message : "User is Created"});
     }
     catch(err){
         const errors = HandleErrors(err)
@@ -62,46 +52,30 @@ exports.register = async(req,res) =>{
     }
 }
 //Login === signin
-exports.signin = async(req,res) =>{
-    console.log("API Hit /publicsite/signin")
-    // console.log(req.body)
-    const {email , password} =req.body
-    try{
-        // console.log(email , password)
-        const user = await User.login(email, password)
-        const token = createToken(user._id)
-        // call for passport authentication
-        passport.authenticate('local', async (err, user, info) => {
-            if (err) return res.status(400).send({ err, status: false, message: 'Oops! Something went wrong while authenticating' });
-            // registered user
-            else if (user) {
-            // if (user.roleId === null && user.type !== 1)
-            // return res.status(403).send({ status: false, message: 'Your account is inactive, kindly contact admin', user });
-            // else if (user.type === 1)
-            // return res.status(403).send({ success: false, message: 'Invalid login attempt' });
-            // else if (user.accountStatus === 2)
-            // return res.status(403).send({ success: false, message: 'Your account is inactive, kindly contact admin', user });
-            // else {
-            //     var accessToken = await user.token();
-            //     let data = {
-            //     ...user._doc,
-            //     accessToken
-            //     }
-            //     await User.updateOne({ _id: user._id }, { $set: { accessToken } }, { upsert: true });
-            //     return res.status(200).send({ status: true, message: 'User logged in successfully', data });
-            // }
-                return res.status(200).json({user , token})
-            }
-            // unknown user or wrong password
-            else return res.status(402).send({ status: false, message: 'Incorrect email or password' });
-        })(req,res);
-    }
-    catch(err){
-        const errors = HandleErrors(err)
-        // console.log(errors)
-        res.send(errors)
-        // console.log(`user is not created ${err}`)
-    }
+exports.signin = async(req, res, next) => {
+    console.log('login hit')
+    passport.authenticate("local", (err, user, info) => {
+      if (err) throw err;
+      console.log(`user : ${user}`)
+      console.log(`err : ${err}`)
+      console.log(`info : ${info}`)
+      if (!user){ return res.json("No User Exists");}
+      else {
+        req.login(user, (err) => {
+          if (err) throw err;
+          console.log(`req.user : ${req.user}`);
+          return res.json({user:req.user}); 
+        });
+      }
+    })(req, res, next);
+}
+exports.detailSignin =(req,res)=>{
+    
+}
+exports.logout = async(req,res)=>{
+    console.log('logout api hit')
+    req.logout();
+    res.json({message: "logout successful"})
 }
 //After SignIn back to Home Screen
 exports.authenticate = (req,res)=> {

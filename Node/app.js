@@ -9,13 +9,6 @@ const passportSetup = require('./config/passport-setup')
 const cookieSession =require('cookie-session')
 const config = require('config')
 const cookieKey = config.get('cookieKey')
-// const GoogleStrategy= require('passport-google-oauth20').Strategy
-// const config = require('config')
-// const clientID = config.get('clientID')
-// const clientSecret = config.get('clientSecret')
-
-// console.log(cookieKey)
-
 //middleware
 app.use(cookieSession({
     maxAge : 24 * 60 * 60  * 1000 ,
@@ -26,27 +19,10 @@ const connectDB = require('./config/db');
 //Connect Database
 connectDB();
 //routes
-// const categories = require('./src/api/categories')
-// const products = require('./src/api/products')
-// const Publicsite = require('./src/api/Publicsite')
 const routes = require('./src/api/Routes/v1');
-
-
-
-// passport.use(
-//     new GoogleStrategy({
-//         callbackURL : "http://localhost:8000/api/google/redirect" ,
-//         clientID : clientID ,
-//         clientSecret : clientSecret
-//     },()=>{
-//         console.log('passport callback function fired')
-//     })
-// )
-
 //cors
-//app.use(cors())
 app.use(cors({
-	origin: ['http://localhost:3000' , 'http://localhost:3001' , 'https://accounts.google.com/'],
+	origin: ['https://8561-202-166-170-107.ngrok.io','http://localhost:3000' , 'http://localhost:3001' , 'https://accounts.google.com/*', 'https://r.stripe.com/*'],
 	credentials:true,
 	exposedHeaders: ["set-cookie"]
 }));
@@ -61,28 +37,13 @@ app.use(cookieParser())
 app.use(express.urlencoded({extended: true}))
 
 
-
-//enable cors
-// app.use((_, res, next) => {
-//   res.header('Access-Control-Allow-Origin', '*')
-//   res.header(
-//     'Access-Control-Allow-Headers',
-//     'Origin, X-Requested-With, Content-Type, Accept'
-//   )
-//   next()
-// })
-
-
-
 // static Path for File Dump
 app.use('/public', express.static('public'));
 // use Routes
 app.use('/v1' , routes)
-// app.use('/api', categories)
-// app.use('/api', products)
-// app.use('/api', Publicsite)
 
 
+//server listen
 app.listen(8000, function() {
   console.log('App running on port 8000');
 });

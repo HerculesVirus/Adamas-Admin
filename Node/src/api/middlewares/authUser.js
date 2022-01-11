@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken')
+const passport = require('passport')
 
-const requireAuth = (req,res,next)=> {
+exports.requireAuthrequireAuth = (req,res,next)=> {
     const token = req.headers['x-access-token']
     console.log("Hello from MIDDLEWARE")
     console.log(typeof token)
@@ -19,8 +20,25 @@ const requireAuth = (req,res,next)=> {
     }
     else{
         console.log('token is not verified')
-        res.json({message: "token not exist"})
+        return res.json({message: "token not exist"})
     }
 }
 
-module.exports = { requireAuth } ;
+exports.checkAuthentication =(req,res)=>{
+    console.log(req)
+
+    if (req.isAuthenticated())
+	{	
+        //req.isAuthenticated() will return true if user is logged in
+		next();	
+	}
+	else
+	{
+        // console.log(`req.isAuthenticated() : ${req.isAuthenticated()}`)
+		if (req.xhr || (req.headers && req.headers.accept && req.headers.accept.indexOf('json') > -1)) {
+			res.status(403).json({message:"user cookie not found"});
+		} else {
+			res.redirect(req.protocol + "://" + req.get('host') + '/signin')
+		}
+	}
+}

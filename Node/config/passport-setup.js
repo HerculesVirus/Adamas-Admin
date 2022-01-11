@@ -9,6 +9,7 @@ const bcrypt = require('bcrypt')
 // console.log(`This is from passport setup`)
 // console.log(`clientID : ${clientID}`)
 // console.log(`clientSecret : ${clientSecret}`)
+
 // Load Model
 const User = require('../src/api/models/user')
 
@@ -47,12 +48,10 @@ passport.use("google",
                     email : profile.emails[0].value ,
                     password : "#@!$$%$"
                 }).save().then((newUser) =>{
-                    // res.send('HEllo')
                     console.log(`new user with following data :  ${newUser}`)
                     done(null,newUser)
                 })
                 .catch((err)=>console.log(err))
-                
             }
         })
         .catch((err) => console.log(err))
@@ -61,19 +60,23 @@ passport.use("google",
 
 passport.use(new localStrategy({ usernameField: 'email' },
     (username, password, done)=>{
+        console.log(`username : ${username}`)
       User.findOne({ email: username }, (err, user)=>{
-        if (err) { return done(err); }
+        console.log(`email : ${username}`)
+        console.log(`user : ${user}`)
+        if (err) throw err; 
         if (!user) { return done(null, false); } // unregistered email
         bcrypt.compare(password , user.password , (err,result)=>{
             if(err) throw err ;
             if(result === true){
+                console.log(`right user`)
                 return done(null,user)
             }
             else{
+                console.log(`user not found`)
                 return done(null,false)
             }
         })// wrong password
-        return done(null, user);
       });
     }
   ));

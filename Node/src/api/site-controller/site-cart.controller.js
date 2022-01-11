@@ -122,7 +122,7 @@ exports.create = async(req,res)=> {
         else{
             //create a cart
             // console.log(`create a cart`)
-            const cart =  new Cart({ USER_ID : userId })
+            const cart =  new Cart({ USER_ID : userId , status : 1})
             // console.log(cart._id)
             cart.save(function (err , result){
                 // console.log(result._id)

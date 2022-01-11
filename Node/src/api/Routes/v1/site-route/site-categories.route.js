@@ -2,6 +2,7 @@
 const express = require('express')
 const controller = require('../../../site-controller/site-categories.controller')
 const router = express.Router()
+const check = require('../../../middlewares/authUser')
 //middleware
 
 //Routes
