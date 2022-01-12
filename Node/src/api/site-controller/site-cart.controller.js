@@ -1,4 +1,5 @@
 //LoadModel
+const mongoose = require('mongoose')
 const Cart = require('../models/Cart')
 const CartItem = require('../models/CartItem')
 const Product = require('../models/Product')
@@ -176,26 +177,58 @@ exports.retrieve = async(req,res) => {
 exports.update = async(req,res) => {
     console.log(`Hello PUT HIT`)
     //Qty should be send in req.body
+    const id = req.params.cartItemId;
     const pItem = req.body.data
+
+    console.log(`pItem._id : ${pItem.user}`)
     //pItem.cartItem.productInfo._id -> productId
-    const filter = {'productInfo' : pItem.cartItem.productInfo._id};
+
+    
     //pItem.Qty is new Qty
-    const update = {'Qty' : pItem.Qty}
-    await CartItem.updateOne(filter,update)
-    .then((data)=>{
-        if(data){
-            CartItem.find({}).populate('productInfo')
-            .then(data=>{
-                return res.json({message : "updated Successfully" , data:data})
-            })
-            .catch(err => console.log(err))
+    Cart.find({USER_ID :pItem.user })
+    .then(async currentUser =>{
+        if(currentUser){
+            console.log(currentUser)
+            const id = currentUser[0]._id
             
+            console.log(`_id : ${id}`)
+            const filter = {"cartId" : id} 
+            const update = {"Qty" : pItem.Qty}
+            
+            await CartItem.updateOne(filter,update)
+            .then(async updatedCart => {
+                console.log(updatedCart)
+                await CartItem.find({"cartId": id}).populate("productInfo")
+                .then((data)=>{
+                    console.log(`PUT API find all data`)
+                    console.log(data)
+                    return res.json({message : "updated Successfully" , data:data})
+                })
+                .catch(err => console.log(err))
+            })
+            .catch(err=>console.log(err))
         }
         else{
-            console.log(`some issue is occured`)
+            console.log('user is Not exist in MongoDB')
         }
     })
-    .catch((err)=> console.log(err))
+    
+    //Cart.find()
+    // await CartItem.updateOne(filter,update)
+    // .then((data)=>{
+    //     if(data){
+    //         CartItem.find({}).populate('productInfo')
+    //         .then(data=>{
+    //             return res.json({message : "updated Successfully" , data:data})
+    //         })
+    //         .catch(err => console.log(err))
+            
+    //     }
+    //     else{
+    //         console.log(`some issue is occured`)
+    //     }
+    // })
+    // .catch((err)=> console.log(err))
 }
 //Delete cartItem
 //1-check productExist

@@ -7,7 +7,7 @@ const router = express.Router()
 ////////////////////////////////Cart//////////////
 router.route('/Cart').post(ensureUser.checkAuthentication , controller.create)
 router.route('/Cart').get(controller.retrieve)
-router.route('/CartUpdate').put(controller.update)
+router.route('/CartUpdate/:cartItemId').put(controller.update)
 router.route('/CartDel').delete(controller.delete)
 
 module.exports = router

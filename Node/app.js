@@ -12,7 +12,10 @@ const cookieKey = config.get('cookieKey')
 //middleware
 app.use(cookieSession({
     maxAge : 24 * 60 * 60  * 1000 ,
-    keys : [cookieKey]
+    keys : [cookieKey],
+    httpOnly: true,
+		sameSite: 'none',
+    
 }))
 //DB Connection 
 const connectDB = require('./config/db'); 
@@ -22,10 +25,11 @@ connectDB();
 const routes = require('./src/api/Routes/v1');
 //cors
 app.use(cors({
-	origin: ['https://8561-202-166-170-107.ngrok.io','http://localhost:3000' , 'http://localhost:3001' , 'https://accounts.google.com/*', 'https://r.stripe.com/*'],
+	origin: ['https://0460-202-166-170-107.ngrok.io','http://localhost:3000' , 'http://localhost:3001' , 'https://accounts.google.com/*', 'https://r.stripe.com/*'],
 	credentials:true,
 	exposedHeaders: ["set-cookie"]
 }));
+// app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
 app.options('*', cors());
 
 //Middleware

@@ -24,7 +24,7 @@ exports.requireAuthrequireAuth = (req,res,next)=> {
     }
 }
 
-exports.checkAuthentication =(req,res)=>{
+exports.checkAuthentication =(req,res,next)=>{
     console.log(req)
 
     if (req.isAuthenticated())
